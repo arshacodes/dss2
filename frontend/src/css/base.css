@@ -1,0 +1,56 @@
+@import 'tailwindcss';
+/* @import '../assets/fonts/Poppins/Poppins-Light.ttf'; */
+
+
+@font-face {
+    font-family: Poppins;
+    src: url('../assets/fonts/Poppins/Poppins-Light.ttf') format('truetype');
+}
+.poppins {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 300;
+}
+
+.bg-gradient {
+    background: linear-gradient(90deg, oklch(58.5% 0.233 277.117) 0%, oklch(62.7% 0.265 303.9) 50%, oklch(65.6% 0.241 354.308) 100%);
+}
+
+button:hover {
+    cursor: pointer;
+    transform: scale(1.05);
+    transition: all 0.1s ease-in-out;
+}
+
+.link {
+  position: relative;
+  /* color: black; */
+  cursor: pointer;
+  /* transition: all 0.1s ease-in-out; */
+}
+
+.link::before,
+.link::after {
+  content: "";
+  position: absolute;
+  /* z-index: -1; */
+  height: 1.5px;
+  width: 0;
+  background-color: oklch(62.7% 0.265 303.9);
+  transition: width 0.3s ease-in-out;
+  transform-origin: center;
+}
+
+.link::before {
+  bottom: 0;
+  /* left: 50%; */
+}
+
+.link::after {
+  bottom: 0;
+  right: 50%;
+}
+
+.link:hover::before,
+.v:hover::after {
+  width: 100%;
+}
