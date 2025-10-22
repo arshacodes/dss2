@@ -1,20 +1,17 @@
 // src/config/axiosConfig.js
 import axios from 'axios'
 
-const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000',
-  withCredentials: true,
-  headers: {
-    Accept: 'application/json',
-  },
-})
+// Set global defaults directly on axios
+axios.defaults.baseURL = 'http://127.0.0.1:8000'
+axios.defaults.withCredentials = true
+axios.defaults.headers.common['Accept'] = 'application/json'
+// axios.defaults.headers.common['Content-Type'] = 'multipart/form-data'
 
+// Token setter function
 export const setAuthToken = (token) => {
   if (token) {
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
   } else {
-    delete api.defaults.headers.common['Authorization']
+    delete axios.defaults.headers.common['Authorization']
   }
 }
-
-export { api }

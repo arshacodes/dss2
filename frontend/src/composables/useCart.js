@@ -1,12 +1,14 @@
+// src/composables/useCart.js
 import { ref } from 'vue'
-import { api } from '../config/axiosConfig'
+import axios from 'axios'
 
 export function useCart() {
   const cart = ref([])
 
   const fetchCart = async () => {
     try {
-      const res = await api.get('/cart')
+      await axios.get('/sanctum/csrf-cookie', { withCredentials: true })
+      const res = await axios.get('/cart')
       cart.value = res.data.items.map(item => ({
         id: item.product.id,
         name: item.product.name,
@@ -22,7 +24,8 @@ export function useCart() {
 
   const addToCart = async (product) => {
     try {
-      await api.post('/cart/items', {
+      await axios.get('/sanctum/csrf-cookie', { withCredentials: true })
+      await axios.post('/cart/items', {
         product_id: product.id,
         quantity: 1,
       })
@@ -34,7 +37,8 @@ export function useCart() {
 
   const removeFromCart = async (itemId) => {
     try {
-      await api.delete(`/cart/items/${itemId}`)
+      await axios.get('/sanctum/csrf-cookie', { withCredentials: true })
+      await axios.delete(`/cart/items/${itemId}`)
       await fetchCart()
     } catch (error) {
       console.error('Failed to remove item:', error)

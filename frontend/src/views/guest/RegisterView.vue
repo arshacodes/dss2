@@ -24,6 +24,8 @@ const handleRegister = async () => {
         confirmPassword: confirmPassword.value
     });
     try {
+        // console.log("before response")
+
         const response = await registerUser({
             name: name.value,
             email: email.value,
@@ -31,6 +33,8 @@ const handleRegister = async () => {
             password: password.value,
             password_confirmation: confirmPassword.value
         });
+
+        // console.log("after response")
 
         toast("Registration successful! Redirecting to login...", {
             autoClose: 3000,

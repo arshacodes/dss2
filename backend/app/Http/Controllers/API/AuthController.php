@@ -16,6 +16,7 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
+        echo 'console.log("HATDOG LANG")';
         //sanitize and validate input, prevent injection attacks
         $validator=Validator::make($request->all(), [
             'name' => [ 'required', 'string', 'max:255' ],

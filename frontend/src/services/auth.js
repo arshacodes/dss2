@@ -1,18 +1,31 @@
 // src/services/auth.js
-import { api, setAuthToken } from '../config/axiosConfig.js'
+import axios from 'axios'
+
+// Token setter using global axios
+export const setAuthToken = (token) => {
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+  } else {
+    delete axios.defaults.headers.common['Authorization']
+  }
+}
 
 export const registerUser = async (data) => {
   try {
-    await api.get('/sanctum/csrf-cookie') // Required before auth
+    await axios.get('/sanctum/csrf-cookie') // Required before auth
 
-    const response = await api.post('/register', data)
+    // console.log(data)
+    console.log('Axios baseURL:', axios.defaults.baseURL)
+    const response = await axios.post('api/register', data)
+
+    console.log("hello")
+    console.log(response.data)
     const { token, user, account_type } = response.data
 
     localStorage.setItem('token', token)
     localStorage.setItem('user', JSON.stringify(user))
     localStorage.setItem('account_type', account_type)
 
-    // Set token for future requests
     setAuthToken(token)
 
     return { user, account_type }
@@ -24,16 +37,15 @@ export const registerUser = async (data) => {
 
 export const loginUser = async (data) => {
   try {
-    await api.get('/sanctum/csrf-cookie') // Required before login
+    await axios.get('/sanctum/csrf-cookie') // Required before login
 
-    const response = await api.post('/login', data)
+    const response = await axios.post('/api/login', data)
     const { token, user, account_type } = response.data
 
     localStorage.setItem('token', token)
     localStorage.setItem('user', JSON.stringify(user))
     localStorage.setItem('account_type', account_type)
 
-    // Set token for future requests
     setAuthToken(token)
 
     return { user, account_type }
