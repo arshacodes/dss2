@@ -6,6 +6,9 @@ import { registerUser } from '../../services/auth.js';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
 const name = ref('');
 const email = ref('');
 const accountType = ref('');
@@ -29,17 +32,21 @@ const handleRegister = async () => {
             password_confirmation: confirmPassword.value
         });
 
-        toast("Registration successful!", {
+        toast("Registration successful! Redirecting to login...", {
             autoClose: 3000,
             position: "bottom-left",
             type: "success",
         });
 
-        router.push('/login');
+        setTimeout(() => {
+            router.push('/login');
+        }, 3000);
+
+        // router.push('/login');
     } catch (error) {
         let message = "Registration failed.";
 
-        toast(message, {
+        toast(error, {
         autoClose: 4000,
         position: "bottom-left",
         type: "error",

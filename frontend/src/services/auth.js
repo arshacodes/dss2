@@ -1,52 +1,44 @@
-import { api, setAuthToken } from "@/config/axiosConfig";
+// src/services/auth.js
+import { api, setAuthToken } from '../config/axiosConfig.js'
 
 export const registerUser = async (data) => {
-    //send request to backend
-    try {
-        const response = await api.post("/register", data, {
-            headers: {
-                'Accept': 'application/json',
-            }
-        });
-        console.log(response.data);
-        // return response.data;
-        // const { token, user } = response.data;
-        // localStorage.setItem('token', token);
-        // localStorage.setItem('user', JSON.stringify(user));
+  try {
+    await api.get('/sanctum/csrf-cookie') // Required before auth
 
-        return response.user;
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
+    const response = await api.post('/register', data)
+    const { token, user, account_type } = response.data
+
+    localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(user))
+    localStorage.setItem('account_type', account_type)
+
+    // Set token for future requests
+    setAuthToken(token)
+
+    return { user, account_type }
+  } catch (error) {
+    console.error('Register error:', error)
+    throw error
+  }
 }
 
 export const loginUser = async (data) => {
-    //send request to backend
-    try {
-        const response = await api.post("/login", data, {
-            headers: {
-                'Accept': 'application/json',
-            }
-        });
-        // Set the auth token for future requests
-        // setAuthToken(response.data.token);
+  try {
+    await api.get('/sanctum/csrf-cookie') // Required before login
 
-        const { token, data: user, account_type } = response.data;
+    const response = await api.post('/login', data)
+    const { token, user, account_type } = response.data
 
-        // if (!token || !user) {
-        //     throw new Error("Invalid login response");
-        // }
+    localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(user))
+    localStorage.setItem('account_type', account_type)
 
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
-        // localStorage.setItem('account_type', account_type);
+    // Set token for future requests
+    setAuthToken(token)
 
-        console.log(response.data);
-        return { user, account_type };
-    } catch (error) {
-        // console.error(response.data);
-        console.error("Login error:", error);
-        throw error;
-    }
+    return { user, account_type }
+  } catch (error) {
+    console.error('Login error:', error)
+    throw error
+  }
 }

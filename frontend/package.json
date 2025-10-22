@@ -15,6 +15,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
     "axios": "^1.12.2",
+    "lucide-vue-next": "^0.546.0",
     "pinia": "^3.0.3",
     "tailwindcss": "^4.1.14",
     "vue": "^3.5.22",
@@ -24,7 +25,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
     "prettier": "3.6.2",
-    "vite": "^7.1.7",
+    "vite": "^7.1.11",
     "vite-plugin-vue-devtools": "^8.0.2"
   }
 }

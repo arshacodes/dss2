@@ -28,13 +28,22 @@ const handleLogin = async () => {
             type: "success",
         });
 
-        if (account_type == 'buyer') {
-            router.push('/auth/shop');
-            console.log('Redirecting to /shop');
-        } else if (account_type == 'seller'){
-            router.push('/auth/sell');
-            console.log('Redirecting to /sell');
-        } 
+        setTimeout(() => {
+            // Redirect based on account type
+            if (account_type == 'buyer') {
+                router.push('/shop');
+            } else if (account_type == 'seller'){
+                router.push('/sell');
+            } 
+        }, 3000);
+
+        // if (account_type == 'buyer') {
+        //     router.push('/shop');
+        //     console.log('Redirecting to /shop');
+        // } else if (account_type == 'seller'){
+        //     router.push('/sell');
+        //     console.log('Redirecting to /sell');
+        // } 
 
         console.log('Login response:', response);
     } catch (error) {

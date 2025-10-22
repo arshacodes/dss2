@@ -4,9 +4,15 @@ namespace App\Providers;
 
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\ServiceProvider;
+use App\Models\Product;
+use App\Policies\ProductPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
+    protected $policies = [
+        Product::class => ProductPolicy::class,
+    ];
+
     /**
      * Register any application services.
      */
