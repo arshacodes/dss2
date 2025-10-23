@@ -29,13 +29,25 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/products/{product}', [ProductController::class, 'destroy']);
 
     Route::get('/cart', [CartController::class, 'show']);
+    Route::get('/cart/items', [CartController::class, 'items']);
+    Route::put('/cart/items/{id}', [CartItemController::class, 'update']);
     Route::delete('/cart/items/{id}', [CartItemController::class, 'destroy']);
+    Route::delete('/cart/clear', [CartController::class, 'clear']);
     Route::post('/cart/items', [CartItemController::class, 'store']);
-    Route::get('/cart/items', [CartItemController::class, 'show']);
+    // Route::get('/cart/items/{userId}/{itemId}', [CartItemController::class, 'show']);
+    Route::get('/cart/{cart}/items', [CartItemController::class, 'show']);
+    // Route::get('/cart/items', [CartItemController::class, 'show']);
 
     Route::get('products/{id}', [ProductController::class, 'show']);
 
+    Route::get('/orders', [OrderController::class, 'index']);
     Route::post('/orders', [OrderController::class, 'store']);
+    Route::post('/orders/checkout', [OrderController::class, 'checkout']);
+    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel']);
+    Route::post('/orders/{order}/received', [OrderController::class, 'markAsReceived']);
+    Route::get('/seller/orders', [OrderController::class, 'sellerOrders']);
+    Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
+    Route::get('/dashboard', [OrderController::class, 'dashboard']);
 });
 
 Route::get('/test', function () {

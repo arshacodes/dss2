@@ -3,11 +3,39 @@ import BuyerNavbar from '../components/BuyerNavbar.vue'
 import HomeView from './HomeView.vue'
 import CartView from './CartView.vue'
 import BuyerOrders from './BuyerOrders.vue'
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useAuth } from '@/composables/useAuth'
+import { useRoute } from 'vue-router'
 
 const { currentUser } = useAuth()
+const route = useRoute()
 const selectedView = ref('home')
+
+// Handle URL query parameters for tab switching
+const handleRouteChange = () => {
+  const tab = route.query.tab
+  const order = route.query.order
+
+  if (tab === 'orders') {
+    selectedView.value = 'orders'
+  } else if (tab === 'cart') {
+    selectedView.value = 'cart'
+  } else {
+    selectedView.value = 'home'
+  }
+
+  // If order parameter is present, we could highlight or scroll to that order
+  if (order && tab === 'orders') {
+    // Could add logic to highlight specific order
+  }
+}
+
+onMounted(() => {
+  handleRouteChange()
+})
+
+// Watch for route changes to handle navigation from within the app
+watch(() => route.query, handleRouteChange, { deep: true })
 </script>
 
 <template>

@@ -10,13 +10,11 @@ const orders = ref([])
 const loading = ref(true)
 const selectedFilter = ref('all')
 
-// Status configurations
+// Status configurations - matching backend migration enum
 const statusConfig = {
-  pending: { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-900/30', label: 'Pending' },
-  processing: { icon: Package, color: 'text-blue-400', bg: 'bg-blue-900/30', label: 'Processing' },
-  shipped: { icon: Truck, color: 'text-purple-400', bg: 'bg-purple-900/30', label: 'Shipped' },
-  delivered: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-900/30', label: 'Delivered' },
-  completed: { icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-900/50', label: 'Completed' },
+  'to ship': { icon: Package, color: 'text-yellow-400', bg: 'bg-yellow-900/30', label: 'To Ship' },
+  'to receive': { icon: Truck, color: 'text-blue-400', bg: 'bg-blue-900/30', label: 'To Receive' },
+  received: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-900/30', label: 'Received' },
   cancelled: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-900/30', label: 'Cancelled' }
 }
 
@@ -30,11 +28,9 @@ const filteredOrders = computed(() => {
 const orderCounts = computed(() => {
   const counts = {
     all: orders.value.length,
-    pending: 0,
-    processing: 0,
-    shipped: 0,
-    delivered: 0,
-    completed: 0,
+    'to ship': 0,
+    'to receive': 0,
+    received: 0,
     cancelled: 0
   }
   orders.value.forEach(order => {
@@ -66,9 +62,8 @@ const fetchOrders = async () => {
 // Update order status
 const updateOrderStatus = async (orderId, newStatus) => {
   const statusMessages = {
-    processing: 'Mark as processing?',
-    shipped: 'Mark as shipped?',
-    delivered: 'Mark as delivered?',
+    'to receive': 'Mark as to receive?',
+    received: 'Mark as received?',
     cancelled: 'Are you sure you want to cancel this order?'
   }
 
@@ -87,9 +82,8 @@ const updateOrderStatus = async (orderId, newStatus) => {
     }
 
     const successMessages = {
-      processing: 'Order marked as processing',
-      shipped: 'Order marked as shipped',
-      delivered: 'Order marked as delivered',
+      'to receive': 'Order marked as to receive',
+      received: 'Order marked as received',
       cancelled: 'Order cancelled successfully'
     }
 
@@ -105,12 +99,11 @@ const cancelOrder = async (orderId) => {
   await updateOrderStatus(orderId, 'cancelled')
 }
 
-// Get next available status
+// Get next available status - matching backend enum
 const getNextStatus = (currentStatus) => {
   const statusFlow = {
-    pending: 'processing',
-    processing: 'shipped',
-    shipped: 'delivered'
+    'to ship': 'to receive',
+    'to receive': 'received'
   }
   return statusFlow[currentStatus]
 }
@@ -158,23 +151,23 @@ onMounted(() => {
         <p class="text-2xl font-bold text-purple-400">{{ orderCounts.all }}</p>
       </div>
       <div class="bg-gray-900 rounded-lg p-4 border border-yellow-900/30">
-        <p class="text-gray-400 text-sm mb-1">Pending</p>
-        <p class="text-2xl font-bold text-yellow-400">{{ orderCounts.pending }}</p>
+        <p class="text-gray-400 text-sm mb-1">To Ship</p>
+        <p class="text-2xl font-bold text-yellow-400">{{ orderCounts['to ship'] }}</p>
       </div>
       <div class="bg-gray-900 rounded-lg p-4 border border-blue-900/30">
-        <p class="text-gray-400 text-sm mb-1">Processing</p>
-        <p class="text-2xl font-bold text-blue-400">{{ orderCounts.processing }}</p>
+        <p class="text-gray-400 text-sm mb-1">To Receive</p>
+        <p class="text-2xl font-bold text-blue-400">{{ orderCounts['to receive'] }}</p>
       </div>
       <div class="bg-gray-900 rounded-lg p-4 border border-green-900/30">
-        <p class="text-gray-400 text-sm mb-1">Completed</p>
-        <p class="text-2xl font-bold text-green-400">{{ orderCounts.completed }}</p>
+        <p class="text-gray-400 text-sm mb-1">Received</p>
+        <p class="text-2xl font-bold text-green-400">{{ orderCounts.received }}</p>
       </div>
     </div>
 
     <!-- Filter Tabs -->
     <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
       <button
-        v-for="filter in ['all', 'pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled']"
+        v-for="filter in ['all', 'to ship', 'to receive', 'received', 'cancelled']"
         :key="filter"
         @click="selectedFilter = filter"
         :class="[
@@ -184,8 +177,8 @@ onMounted(() => {
             : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
         ]"
       >
-        {{ filter.charAt(0).toUpperCase() + filter.slice(1) }}
-        <span 
+        {{ filter === 'all' ? 'All' : statusConfig[filter]?.label || filter }}
+        <span
           v-if="orderCounts[filter] > 0"
           class="ml-2 px-2 py-0.5 bg-gray-700 rounded-full text-xs"
         >
@@ -299,21 +292,14 @@ onMounted(() => {
             Mark as {{ statusConfig[getNextStatus(order.status)]?.label }}
           </button>
 
-          <!-- Cancel Order Button (only for pending/processing) -->
+          <!-- Cancel Order Button (only for to ship) -->
           <button
-            v-if="order.status === 'pending' || order.status === 'processing'"
+            v-if="order.status === 'to ship'"
             @click="cancelOrder(order.id)"
             class="flex-1 bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition-colors flex items-center justify-center gap-2"
           >
             <XCircle class="w-4 h-4" />
             Cancel Order
-          </button>
-
-          <!-- View Details Button -->
-          <button
-            class="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded transition-colors"
-          >
-            View Details
           </button>
         </div>
 

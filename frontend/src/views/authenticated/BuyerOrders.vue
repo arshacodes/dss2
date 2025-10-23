@@ -10,13 +10,11 @@ const orders = ref([])
 const loading = ref(true)
 const selectedFilter = ref('all')
 
-// Status configurations
+// Status configurations - matching backend migration enum
 const statusConfig = {
-  pending: { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-900/30', label: 'Pending' },
-  processing: { icon: Package, color: 'text-blue-400', bg: 'bg-blue-900/30', label: 'Processing' },
-  shipped: { icon: Truck, color: 'text-purple-400', bg: 'bg-purple-900/30', label: 'Shipped' },
-  delivered: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-900/30', label: 'Delivered' },
-  completed: { icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-900/50', label: 'Completed' },
+  'to ship': { icon: Package, color: 'text-yellow-400', bg: 'bg-yellow-900/30', label: 'To Ship' },
+  'to receive': { icon: Truck, color: 'text-blue-400', bg: 'bg-blue-900/30', label: 'To Receive' },
+  received: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-900/30', label: 'Received' },
   cancelled: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-900/30', label: 'Cancelled' }
 }
 
@@ -55,7 +53,7 @@ const markAsReceived = async (orderId) => {
     // Update local state
     const order = orders.value.find(o => o.id === orderId)
     if (order) {
-      order.status = 'completed'
+      order.status = 'received'
     }
 
     toast.success('Order marked as received! Seller has been notified.')
@@ -67,10 +65,11 @@ const markAsReceived = async (orderId) => {
 
 // View order details
 const viewOrderDetails = (orderId) => {
-  router.push(`/orders/${orderId}`)
+  console.log('Viewing order details for order:', orderId)
+  router.push({ path: '/shop', query: { tab: 'orders', order: orderId } })
 }
 
-// Cancel order (only if pending)
+// Cancel order (only if to ship)
 const cancelOrder = async (orderId) => {
   if (!confirm('Are you sure you want to cancel this order?')) return
 
@@ -93,9 +92,12 @@ const cancelOrder = async (orderId) => {
 
 // Calculate total price for an order
 const getOrderTotal = (order) => {
-  return order.items?.reduce((sum, item) => {
-    return sum + (item.price * item.quantity)
-  }, 0) || order.total_price || 0
+  if (order.items && order.items.length > 0) {
+    return order.items.reduce((sum, item) => {
+      return sum + (parseFloat(item.price || 0) * parseInt(item.quantity || 0))
+    }, 0)
+  }
+  return parseFloat(order.total_price || 0)
 }
 
 // Format date
@@ -125,7 +127,7 @@ onMounted(() => {
     <!-- Filter Tabs -->
     <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
       <button
-        v-for="filter in ['all', 'pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled']"
+        v-for="filter in ['all', 'to ship', 'to receive', 'received', 'cancelled']"
         :key="filter"
         @click="selectedFilter = filter"
         :class="[
@@ -135,7 +137,7 @@ onMounted(() => {
             : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
         ]"
       >
-        {{ filter.charAt(0).toUpperCase() + filter.slice(1) }}
+        {{ filter === 'all' ? 'All' : statusConfig[filter]?.label || filter }}
       </button>
     </div>
 
@@ -151,7 +153,7 @@ onMounted(() => {
         {{ selectedFilter === 'all' ? 'No orders yet' : `No ${selectedFilter} orders` }}
       </p>
       <button
-        @click="router.push('/products')"
+        @click="router.push({ path: '/shop', query: { tab: 'home' } })"
         class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded"
       >
         Start Shopping
@@ -230,14 +232,7 @@ onMounted(() => {
         <!-- Action Buttons -->
         <div class="flex flex-wrap gap-3">
           <button
-            @click="viewOrderDetails(order.id)"
-            class="flex-1 bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded transition-colors"
-          >
-            View Details
-          </button>
-
-          <button
-            v-if="order.status === 'delivered'"
+            v-if="order.status === 'to receive'"
             @click="markAsReceived(order.id)"
             class="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-semibold transition-colors flex items-center justify-center gap-2"
           >
@@ -246,7 +241,7 @@ onMounted(() => {
           </button>
 
           <button
-            v-if="order.status === 'pending'"
+            v-if="order.status === 'to ship'"
             @click="cancelOrder(order.id)"
             class="flex-1 bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition-colors flex items-center justify-center gap-2"
           >
@@ -255,7 +250,7 @@ onMounted(() => {
           </button>
 
           <button
-            v-if="order.status === 'completed'"
+            v-if="order.status === 'received'"
             class="flex-1 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded transition-colors"
           >
             Reorder

@@ -8,10 +8,10 @@ use App\Models\CartItem;
 
 class CartItemController extends Controller
 {
-    public function show(Request $request)
+    public function show(Request $request, Cart $cart)
     {
-        $item = CartItem::where('cart_id', $cart->id);
-        return response()->json($item);
+        $items = CartItem::where('cart_id', $cart->id)->get();
+        return response()->json($items);
     }
 
     public function store(Request $request)
@@ -21,19 +21,29 @@ class CartItemController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $cart = Cart::where('buyer_id', $buyerId)->first();
-
-        // if (!$cart) {
-            // Found a cart
-            // You can access $cart->id, $cart->total, etc.
-        // } else {
-            $cart = Cart::firstOrCreate(['buyer_id' => $request->user()->id]);
-        // }
+        $cart = Cart::firstOrCreate(['user_id' => $request->user()->id]);
 
         $item = CartItem::updateOrCreate(
             ['cart_id' => $cart->id, 'product_id' => $request->product_id],
             ['quantity' => \DB::raw("quantity + {$request->quantity}")]
         );
+
+        return response()->json($item);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $item = CartItem::findOrFail($id);
+
+        if ($item->cart->user_id !== $request->user()->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $item->update(['quantity' => $request->quantity]);
 
         return response()->json($item);
     }

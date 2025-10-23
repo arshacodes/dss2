@@ -44,11 +44,18 @@ const router = createRouter({
           meta: { requiresAuth: true, role: 'buyer' },
         },
         {
+          path: 'dashboard',
+          name: 'dashboard',
+          component: () => import('@/views/authenticated/DashboardView.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
           path: 'product/:id',
           name: 'ProductDetail',
           component: () => import('@/views/authenticated/ProductDetailView.vue'),
           props: true,
-        }
+        },
+
       ],
     },
   ],

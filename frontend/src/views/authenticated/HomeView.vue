@@ -98,7 +98,7 @@ const seller_name = computed(() => props.user?.name || '')
 </script>
 
 <template>
-  <div class="bg-gradient p-6 rounded shadow text-white mb-4">
+  <div class="bg-gradient p-6 rounded-lg shadow text-white mb-4">
     <h2 class="text-xl font-bold mb-4">Welcome, {{ seller_name }}!</h2>
     <p>Shop like a billionaire! Free shipping everywhere!</p>
   </div>

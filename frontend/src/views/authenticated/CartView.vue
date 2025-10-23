@@ -154,12 +154,11 @@ const checkout = async () => {
     toast.success('Order placed successfully!')
     cartItems.value = []
     
-    // Redirect to order confirmation or orders page
-    if (response.order_id) {
-      router.push(`/orders/${response.order_id}`)
-    } else {
-      router.push('/orders')
-    }
+    // Stay in shop view and switch to orders tab
+    // Emit event to parent to change view to orders
+    // Since this is a component in ShopView, we need to emit to parent
+    // For now, just show success message and stay in cart
+    toast.success('Order placed successfully! Check your orders tab.')
   } catch (error) {
     console.error('Checkout failed:', error)
     toast.error('Checkout failed. Please try again.')
@@ -199,7 +198,7 @@ onMounted(() => {
         <ShoppingCart class="w-16 h-16 mx-auto mb-4 text-gray-600" />
         <p class="text-xl text-gray-400 mb-4">Your cart is empty</p>
         <button
-          @click="router.push('/products')"
+          @click="router.push({ path: '/shop', query: { tab: 'home' } })"
           class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded"
         >
           Continue Shopping
@@ -311,7 +310,7 @@ onMounted(() => {
             </button>
 
             <button
-              @click="router.push('/products')"
+              @click="router.push({ path: '/shop', query: { tab: 'home' } })"
               class="w-full mt-3 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded"
             >
               Continue Shopping
