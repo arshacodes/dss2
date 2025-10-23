@@ -51,4 +51,6 @@ class OrderController extends Controller
 
         return response()->json(['message' => 'Order placed successfully']);
     }
+
+    public function
 }

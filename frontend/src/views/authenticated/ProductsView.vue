@@ -68,6 +68,7 @@ const submit = async () => {
     formData.append('description', newProduct.value.description)
     formData.append('price', newProduct.value.price)
     formData.append('stock', newProduct.value.stock)
+    formData.append('seller_id', props.user.id)
 
     if (newProduct.value.image) {
       formData.append('image', newProduct.value.image)

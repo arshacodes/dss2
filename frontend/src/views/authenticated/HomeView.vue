@@ -1,9 +1,10 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
 import { useProducts } from '@/composables/useProducts'
+import { apiFetch } from '@/config/fetchConfig'
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
-import { ShoppingCart } from 'lucide-vue-next'
+import { ShoppingCart, Plus } from 'lucide-vue-next'
 
 const { products, fetchProducts } = useProducts()
 
@@ -12,6 +13,7 @@ const sortBySales = ref(false)
 const priceRange = ref([0, 99999])
 const currentPage = ref(1)
 const itemsPerPage = 8
+const addingToCart = ref({})
 
 onMounted(async () => {
   try {
@@ -58,6 +60,32 @@ const goToPage = (page) => {
   }
 }
 
+// Add to Cart Function
+const addToCart = async (product) => {
+  if (product.stock <= 0) {
+    toast.error('Product is out of stock')
+    return
+  }
+
+  addingToCart.value[product.id] = true
+
+  try {
+    await apiFetch('/api/cart/items', {
+      method: 'POST',
+      body: JSON.stringify({
+        product_id: product.id,
+        quantity: 1
+      })
+    })
+
+    toast.success(`${product.name} added to cart!`)
+  } catch (error) {
+    console.error('Failed to add to cart:', error)
+    toast.error('Failed to add to cart')
+  } finally {
+    addingToCart.value[product.id] = false
+  }
+}
 
 const props = defineProps({
   user: {
@@ -106,30 +134,35 @@ const seller_name = computed(() => props.user?.name || '')
   <!-- Product Grid -->
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
     <div v-for="product in paginatedProducts" :key="product.id">
-            <div class="rounded-lg p-4 shadow hover:shadow-lg transition bg-gray-900">
-                <router-link :to="`/product/${product.id}`" class="block">
-                    <img :src="product.image_url" :alt="product.name" class="w-full h-48 object-cover rounded mb-2" />
-                    <h3 class="font-semibold text-lg text-white">{{ product.name }}</h3>
-                    <p class="text-sm text-gray-300">₱{{ product.price }}</p>
-                    <p class="text-xs text-gray-400">
-                        <span :class="product.stock <= 10 ? 'text-red-500 font-bold' : ''">
-                        {{ product.stock }} in stock
-                        </span>
-                        | Sold {{ product.sales }}
-                    </p>
-                </router-link>
+      <div class="rounded-lg p-4 shadow hover:shadow-lg transition bg-gray-900 flex flex-col">
+        <router-link :to="`/product/${product.id}`" class="block">
+          <img :src="product.image_url" :alt="product.name" class="w-full h-48 object-cover rounded mb-2" />
+          <h3 class="font-semibold text-lg text-white">{{ product.name }}</h3>
+          <p class="text-sm text-gray-300">₱{{ product.price }}</p>
+          <p class="text-xs text-gray-400 mb-3">
+            <span :class="product.stock <= 10 ? 'text-red-500 font-bold' : ''">
+              {{ product.stock }} in stock
+            </span>
+            | Sold {{ product.sales }}
+          </p>
+        </router-link>
 
-                <!-- <button
-                    @click="addToCart(product)"
-                    :disabled="product.stock === 0"
-                    class="mt-3 w-full bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 disabled:opacity-50 flex flex-row justify-center items-center"
-                >
-                    <ShoppingCart class="inline" />
-                    <p class="inline ms-3">Add to Cart</p>
-                </button> -->
-            </div>
-
-        </div>
+        <!-- Add to Cart Button -->
+        <button
+          @click.stop="addToCart(product)"
+          :disabled="product.stock <= 0 || addingToCart[product.id]"
+          :class="[
+            'w-full py-2 rounded font-semibold transition-colors flex items-center justify-center gap-2',
+            product.stock <= 0 
+              ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+              : 'bg-pink-500 hover:bg-pink-600 text-white'
+          ]"
+        >
+          <ShoppingCart class="w-4 h-4" />
+          {{ addingToCart[product.id] ? 'Adding...' : product.stock <= 0 ? 'Out of Stock' : 'Add to Cart' }}
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Pagination -->

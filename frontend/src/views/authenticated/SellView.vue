@@ -1,10 +1,6 @@
 <script setup>
 import SellerNavbar from '../components/SellerNavbar.vue'
-import DashboardView from './DashboardView.vue'
-import ProductsView from './ProductsView.vue'
-import OrdersView from './OrdersView.vue'
-
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
@@ -13,24 +9,34 @@ const router = useRouter()
 const selectedView = ref('dashboard')
 const currentUser = ref(null)
 
+// Lazy load these components to help identify which one is causing the error
+const DashboardView = defineAsyncComponent(() => import('./DashboardView.vue'))
+const ProductsView = defineAsyncComponent(() => import('./ProductsView.vue'))
+const OrdersView = defineAsyncComponent(() => import('./OrdersView.vue'))
+
 onMounted(() => {
-  const storedUser = localStorage.getItem('user')
+  const rawUser = localStorage.getItem('user')
   const role = localStorage.getItem('account_type')
 
-  if (!storedUser || role?.toLowerCase() !== 'seller') {
+  if (!rawUser || rawUser === 'undefined' || role?.toLowerCase() !== 'seller') {
     toast.error('Unauthorized access')
     router.push('/unauthorized')
-  } else {
-    currentUser.value = JSON.parse(storedUser)
+    return
+  }
+
+  try {
+    const parsedUser = JSON.parse(rawUser)
+    currentUser.value = parsedUser
+  } catch (e) {
+    console.error('Failed to parse user:', e)
+    toast.error('Invalid user data')
+    router.push('/unauthorized')
   }
 })
 
-// console.log('Current User:', currentUser)
-// console.log('Selected View:', selectedView)
-// console.log('Account Type:', localStorage.getItem('account_type'))
-// console.log('User from Local Storage:', localStorage.getItem('user'))
-// console.log('Token from Local Storage:', localStorage.getItem('token'))
-// console.log
+watch(selectedView, (val) => {
+  console.log('Selected view changed to:', val)
+})
 </script>
 
 <template>

@@ -34,7 +34,7 @@ const router = createRouter({
         {
           path: 'sell',
           name: 'sell',
-          component: () => import('@/views/authenticated/SellView.vue'),
+          component: () => import('../views/authenticated/SellView.vue'),
           meta: { requiresAuth: true, role: 'seller' },
         },
         {

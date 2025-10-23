@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { toast } from 'vue3-toastify'
 import { useProducts } from '@/composables/useProducts'
-import { api } from '@/config/axiosConfig'
+import { apiFetch } from '@/config/fetchConfig'
 import BuyerNavbar from '../components/BuyerNavbar.vue'
 import { ShoppingCart } from 'lucide-vue-next'
 
@@ -32,9 +32,12 @@ const addToCart = async () => {
   }
 
   try {
-    await api.post('/cart/items', {
-      product_id: product.value.id,
-      quantity: quantity.value,
+    await apiFetch('/api/cart/items', {
+      method: 'POST',
+      body: {
+        product_id: product.value.id,
+        quantity: quantity.value,
+      }
     })
 
     toast.success('Added to cart!')

@@ -8,6 +8,12 @@ use App\Models\CartItem;
 
 class CartItemController extends Controller
 {
+    public function show(Request $request)
+    {
+        $item = CartItem::where('cart_id', $cart->id);
+        return response()->json($item);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -15,7 +21,14 @@ class CartItemController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $cart = Cart::firstOrCreate(['buyer_id' => $request->user()->id]);
+        $cart = Cart::where('buyer_id', $buyerId)->first();
+
+        // if (!$cart) {
+            // Found a cart
+            // You can access $cart->id, $cart->total, etc.
+        // } else {
+            $cart = Cart::firstOrCreate(['buyer_id' => $request->user()->id]);
+        // }
 
         $item = CartItem::updateOrCreate(
             ['cart_id' => $cart->id, 'product_id' => $request->product_id],
